@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/technorati/xmlParser.php');
 
 /* Config Section */
 
-$API_KEY = "47f61580497b5ac8e090dbd49082e398";
+$API_KEY = "NONE";
 $CACHE_PATH = "/usr/u/www/blog/tcache";
 $CACHE_TIMEOUT = 6 * 60 * 60; /* six hours, split out for easy editing :) */
                               /* you want to set this to a healthy value, remember: 500 queries a day! */
