@@ -18,7 +18,7 @@ $API_KEY = "NONE";
 $CACHE_PATH = "/usr/u/www/blog/tcache"; /* must be accessible and writable to the webserver */
 $CACHE_TIMEOUT = 6 * 60 * 60;           /* six hours, split out for easy editing :) */
                                         /* you want to set this to a healthy value, remember: 500 queries a day! */
-$TAG_LIMIT = 10                         /* how many tagged posts to retrieve for the tags query */
+$TAG_LIMIT = 10;                        /* how many tagged posts to retrieve for the tags query */
 
 /* You should be fine with not touching anything below this line */
 
