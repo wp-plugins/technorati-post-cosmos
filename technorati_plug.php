@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/technorati/xmlParser.php');
 
 /* Config Section */
 
-$API_KEY = "47f61580497b5ac8e090dbd49082e398";
+$API_KEY = "";
 $CACHE_PATH = "/usr/u/www/blog/tcache"; /* must be accessible and writable to the webserver */
 $CACHE_TIMEOUT = 6 * 60 * 60;           /* six hours, split out for easy editing :) */
                                         /* you want to set this to a healthy value, remember: 500 queries a day! */
@@ -72,7 +72,7 @@ function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />"
    $linkname = array();
 
    foreach ($cats as $cat) {
-      $tagname = $cat->cat_name;
+      $tagname = str_replace(' ', '', $cat->cat_name);
       $curl = "http://api.technorati.com/tag?format=xml&tag=$tagname&key=$API_KEY&limit=$TAG_LIMIT";
       $my_xml = technorati_file_contents($curl, 'r', $CACHE_TIMEOUT, $CACHE_PATH, 0);
       $p = new XMLParser;
@@ -81,9 +81,16 @@ function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />"
       $p->buildXmlTree();
       $struct = $p->getXmlTree();
       $i = 0;
+      
       foreach ($struct[0]['children'][0]['children'] as $pkey => $pvalue) {
          if ($pvalue['tag'] == "TECHNORATI:ITEM") { $inbound[$i++] = technorati_parse_item($pvalue['children']); }
       }
+      
+      if (!$inbound) {
+         print "$before No talk about <a href=\"http://www.technorati.com/tag/$tagname/\">$tagname</a> on Technorati.$after";
+         return(0);
+      }
+      
       foreach ($inbound as $key => $value) {
          $plink = $value['itempermalink'] ? $value['itempermalink'] : $value['itemurl'];
          $excerpt = $show_excerpt ? $between . $value['excerpt'] : '';
@@ -95,6 +102,7 @@ function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />"
             print "$before<a href='".$plink."'>$title</a> $name$excerpt$after";
          }
       }
+      
    }   
 
 }
