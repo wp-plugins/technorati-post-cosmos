@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/technorati/xmlParser.php');
 
 /* Config Section */
 
-$API_KEY = "NONE";
+$API_KEY = "47f61580497b5ac8e090dbd49082e398";
 $CACHE_PATH = "/usr/u/www/blog/tcache"; /* must be accessible and writable to the webserver */
 $CACHE_TIMEOUT = 6 * 60 * 60;           /* six hours, split out for easy editing :) */
                                         /* you want to set this to a healthy value, remember: 500 queries a day! */
@@ -66,9 +66,10 @@ function _add_technorati_post_links($id) {
 }
 
 function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />", $show_blog=true, $show_excerpt=false, $print="true") {
-   global $API_KEY, $CACHE_TIMEOUT, $CACHE_PATH;
+   global $API_KEY, $CACHE_TIMEOUT, $CACHE_PATH, $TAG_LIMIT;
 
    $cats = get_the_category();
+   $linkname = array();
 
    foreach ($cats as $cat) {
       $tagname = $cat->cat_name;
@@ -89,8 +90,8 @@ function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />"
          $name = $show_blog ? "(".$value['name'].")" : '';
          $title = $value['itemtitle'];
          
-         if ($plink != $linkname) {
-            $linkname = $plink;
+         if (!in_array($plink,$linkname)) {
+            $linkname[] = $plink;
             print "$before<a href='".$plink."'>$title</a> $name$excerpt$after";
          }
       }
