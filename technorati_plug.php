@@ -65,7 +65,7 @@ function _add_technorati_post_links($id) {
    }
 }
 
-function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />", $show_blog=true; $show_excerpt=false, $print="true") {
+function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />", $show_blog=true, $show_excerpt=false, $print="true") {
    global $API_KEY, $CACHE_TIMEOUT, $CACHE_PATH;
 
    $cats = get_the_category();
