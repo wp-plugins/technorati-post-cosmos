@@ -15,9 +15,10 @@ require_once(dirname(__FILE__).'/technorati/xmlParser.php');
 /* Config Section */
 
 $API_KEY = "NONE";
-$CACHE_PATH = "/usr/u/www/blog/tcache";
-$CACHE_TIMEOUT = 6 * 60 * 60; /* six hours, split out for easy editing :) */
-                              /* you want to set this to a healthy value, remember: 500 queries a day! */
+$CACHE_PATH = "/usr/u/www/blog/tcache"; /* must be accessible and writable to the webserver */
+$CACHE_TIMEOUT = 6 * 60 * 60;           /* six hours, split out for easy editing :) */
+                                        /* you want to set this to a healthy value, remember: 500 queries a day! */
+$TAG_LIMIT = 10                         /* how many tagged posts to retrieve for the tags query */
 
 /* You should be fine with not touching anything below this line */
 
@@ -64,14 +65,14 @@ function _add_technorati_post_links($id) {
    }
 }
 
-function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />", $show_excerpt=false, $print="true") {
+function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />", $show_blog=true; $show_excerpt=false, $print="true") {
    global $API_KEY, $CACHE_TIMEOUT, $CACHE_PATH;
 
    $cats = get_the_category();
 
    foreach ($cats as $cat) {
       $tagname = $cat->cat_name;
-      $curl = "http://api.technorati.com/tag?format=xml&tag=$tagname&key=$API_KEY&limit=10";
+      $curl = "http://api.technorati.com/tag?format=xml&tag=$tagname&key=$API_KEY&limit=$TAG_LIMIT";
       $my_xml = technorati_file_contents($curl, 'r', $CACHE_TIMEOUT, $CACHE_PATH, 0);
       $p = new XMLParser;
       $p->definens('TECHNORATI');
@@ -85,7 +86,7 @@ function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />"
       foreach ($inbound as $key => $value) {
          $plink = $value['itempermalink'] ? $value['itempermalink'] : $value['itemurl'];
          $excerpt = $show_excerpt ? $between . $value['excerpt'] : '';
-         $name = $value['name'];
+         $name = $show_blog ? : "(".$value['name'].")" : '';
          $title = $value['itemtitle'];
          
          if ($plink != $linkname) {
