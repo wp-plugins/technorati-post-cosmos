@@ -33,36 +33,34 @@ function _add_technorati_post_links($id) {
    }
    
    if ($update_me) {
-   /*   $url = get_permalink($id);
-      $curl = "http://api.technorati.com/cosmos?format=xml&url=$url&key=$API_KEY";
-      $my_xml = technorati_file_contents($curl, 'r', $CACHE_TIMEOUT, $CACHE_PATH, 0);
-      $p = new XMLParser;
-      $p->definens('TECHNORATI');
-      $p->setXmlData($my_xml);
-       $p->buildXmlTree();
-       $struct = $p->getXmlTree();
-       
-       if ($struct[0]['children'][0]['children'][0]['children'][0]['tag'] == "TECHNORATI:ERROR") {
-          if ($print) {
-             $output .= "$before<b>Encountered an error, please notify site admin or wait a bit...</b>$after";
-          }
-          else {
-             return 0;
-          }
-       } 
-       else {
-          $i = 0;
-          foreach ( $struct[0]['children'][0]['children'] as $pkey => $pvalue ) {
-             if ($pvalue['tag'] == "TECHNORATI:ITEM") { $inbound[$i++] = technorati_parse_item($pvalue['children']); }
-          }      
-      }
-      if ($comments) {
-         foreach ($comments as $comment) {
-            
-         }
-      }
-   */
+      /* I am missing code */
    }
+}
+
+function technorati_weblog_stats($before="<li>", $after="</li>") {
+   global $API_KEY, $CACHE_TIMEOUT, $CACHE_PATH;
+   $url = get_bloginfo('url');
+   $curl = "http://api.technorati.com/cosmos?format=xml&url=$url&key=$API_KEY";
+   $my_xml = technorati_file_contents($curl, 'r', $CACHE_TIMEOUT, $CACHE_PATH, 0);
+   $p = new XMLParser;
+   $p->definens('TECHNORATI');
+   $p->setXmlData($my_xml);
+   $p->buildXmlTree();
+   $struct = $p->getXmlTree();
+
+   foreach ( $struct[0]['children'][0]['children'] as $key => $value ) {
+      if ($value['tag'] == "TECHNORATI:RESULT") {
+         $blogstruct = technorati_get_undefweblog($value['children']);
+         break;
+      }
+   }
+   $bloginfo = technorati_parse_undefweblog($blogstruct);
+   $output .= "${before}Inbound Links: ". $bloginfo['inboundlinks'] ."${after}";
+   $output .= "${before}Site Links: ". $bloginfo['inboundblogs'] ."${after}";
+   $output .= "${before}<a href='http://www.technorati.com'>Technorati</a> Last Saw Us Update: ". $bloginfo['lastupdate'] ."${after}";         
+   
+   print $output;
+   
 }
 
 function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />", $show_blog=true, $show_excerpt=false, $print="true") {
