@@ -9,7 +9,7 @@ Version: 1.0
 Author URI: http://www.jluster.org
 */ 
 
-require_once(dirname(__FILE__).'/../../' .'wp-config.php');
+require_once(dirname(__FILE__).'../../../' .'wp-config.php');
 require_once(dirname(__FILE__).'/technorati/xmlParser.php');
 
 /* Config Section */
@@ -21,8 +21,84 @@ $CACHE_TIMEOUT = 6 * 60 * 60; /* six hours, split out for easy editing :) */
 
 /* You should be fine with not touching anything below this line */
 
+function _add_technorati_post_links($id) {
+   /* Get and set the current time. No need to do this every time */
+   $update_me = false;
+   add_option('jl_technorati_last_updated', '0');
+   
+   if (get_option('jl_technorati_last_updated') <= (time() - $CACHE_TIMEOUT)) {
+      $update_me = true;
+      update_option('jl_technorati_last_updated', time());
+   }
+   
+   if ($update_me) {
+   /*   $url = get_permalink($id);
+      $curl = "http://api.technorati.com/cosmos?format=xml&url=$url&key=$API_KEY";
+      $my_xml = technorati_file_contents($curl, 'r', $CACHE_TIMEOUT, $CACHE_PATH, 0);
+      $p = new XMLParser;
+      $p->definens('TECHNORATI');
+      $p->setXmlData($my_xml);
+       $p->buildXmlTree();
+       $struct = $p->getXmlTree();
+       
+       if ($struct[0]['children'][0]['children'][0]['children'][0]['tag'] == "TECHNORATI:ERROR") {
+          if ($print) {
+             $output .= "$before<b>Encountered an error, please notify site admin or wait a bit...</b>$after";
+          }
+          else {
+             return 0;
+          }
+       } 
+       else {
+          $i = 0;
+          foreach ( $struct[0]['children'][0]['children'] as $pkey => $pvalue ) {
+             if ($pvalue['tag'] == "TECHNORATI:ITEM") { $inbound[$i++] = technorati_parse_item($pvalue['children']); }
+          }      
+      }
+      if ($comments) {
+         foreach ($comments as $comment) {
+            
+         }
+      }
+   */
+   }
+}
+
+function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />", $show_excerpt=false, $print="true") {
+   global $API_KEY, $CACHE_TIMEOUT, $CACHE_PATH;
+
+   $cats = get_the_category();
+
+   foreach ($cats as $cat) {
+      $tagname = $cat->cat_name;
+      $curl = "http://api.technorati.com/tag?format=xml&tag=$tagname&key=$API_KEY&limit=10";
+      $my_xml = technorati_file_contents($curl, 'r', $CACHE_TIMEOUT, $CACHE_PATH, 0);
+      $p = new XMLParser;
+      $p->definens('TECHNORATI');
+      $p->setXmlData($my_xml);
+      $p->buildXmlTree();
+      $struct = $p->getXmlTree();
+      $i = 0;
+      foreach ($struct[0]['children'][0]['children'] as $pkey => $pvalue) {
+         if ($pvalue['tag'] == "TECHNORATI:ITEM") { $inbound[$i++] = technorati_parse_item($pvalue['children']); }
+      }
+      foreach ($inbound as $key => $value) {
+         $plink = $value['itempermalink'] ? $value['itempermalink'] : $value['itemurl'];
+         $excerpt = $show_excerpt ? $between . $value['excerpt'] : '';
+         $name = $value['name'];
+         $title = $value['itemtitle'];
+         
+         if ($plink != $linkname) {
+            $linkname = $plink;
+            print "$before<a href='".$plink."'>$title</a> ($name)$excerpt$after";
+         }
+      }
+   }   
+
+}
+
 function technorati_links_entry($before="<li>", $after="</li>", $print="true") {
-   global $API_KEY, $URI_ROOT, $CACHE_TIMEOUT, $CACHE_PATH;
+   global $API_KEY, $CACHE_TIMEOUT, $CACHE_PATH;
 
    $url = get_permalink();
    $curl = "http://api.technorati.com/cosmos?format=xml&url=$url&key=$API_KEY";
@@ -97,6 +173,12 @@ function technorati_parse_item($structure) {
       case "TECHNORATI:LINKURL":
           $returnval['url'] = $value['children'][0];
           break;
+      case "TECHNORATI:PERMALINK":
+         $returnval['itempermalink'] = $value['children'][0];
+         break;
+      case "TECHNORATI:TITLE":
+         $returnval['itemtitle'] = $value['children'][0];
+         break;
       case "TECHNORATI:WEBLOG":
           $returnval['name'] = technorati_get_value_from_cosmos($value['children'], "NAME");
           $returnval['itemurl'] = technorati_get_value_from_cosmos($value['children'], "URL");
