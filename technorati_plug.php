@@ -86,12 +86,12 @@ function technorati_tags_entry($before="<li>", $after="</li>", $between="<br />"
       foreach ($inbound as $key => $value) {
          $plink = $value['itempermalink'] ? $value['itempermalink'] : $value['itemurl'];
          $excerpt = $show_excerpt ? $between . $value['excerpt'] : '';
-         $name = $show_blog ? : "(".$value['name'].")" : '';
+         $name = $show_blog ? "(".$value['name'].")" : '';
          $title = $value['itemtitle'];
          
          if ($plink != $linkname) {
             $linkname = $plink;
-            print "$before<a href='".$plink."'>$title</a> ($name)$excerpt$after";
+            print "$before<a href='".$plink."'>$title</a> $name$excerpt$after";
          }
       }
    }   
